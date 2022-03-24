@@ -9,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 import json
 import schedule
+import sys
 
 CREDENTIALS = json.load(open("credentials.json"))
 page_url = "https://en.wikipedia.org/wiki/Special:Random"
@@ -34,15 +35,25 @@ def tweet_article():
         tag = i.find_parent()
         if tag.name == "div":
             if 'class' in tag.attrs and "mw-parser-output" in tag['class']:
-                header_len = 280 - len(f"{page_name} - ...")
-                scraped = f"{page_name} - {i.get_text()[0:header_len]}..."
+                max_content_len = 280 - len(f"{page_name} - ")
+                ellipsis = ""
+
+                if len(i.get_text()) > max_content_len:
+                    max_content_len -= 3 # account for elipses
+                    ellipsis = "..."
+
+                scraped = f"{page_name} - {i.get_text()[0:max_content_len]}{ellipsis}"
                 t = twitter.Tweet()
                 t.text(scraped)
                 print(f"sending the following to twitter:\n{scraped}")
                 return t.send_as_oauth1()
 
-schedule.every().day.at("12:00").do(tweet_article)
-# schedule.every(5).seconds.do(tweet_article)
+if len(sys.argv) == 2 and sys.argv[1] == "daily":
+    print("\x1b[31m**DAILY RUN**\x1b[0m")
+    schedule.every().day.at("12:00").do(tweet_article)
+else:
+    print("\x1b[31m**HOURLY RUN**\x1b[0m")
+    schedule.every().hour.do(tweet_article)
 
 print("setup complete, listening...")
 while True:
