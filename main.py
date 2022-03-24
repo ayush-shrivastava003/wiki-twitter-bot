@@ -30,19 +30,20 @@ def tweet_article():
 
     # the intro paragraph does not have a class name or other identifier, however therer are a bunch of other p tags
     # that don't have an identifier either. This is meant to only get the text we care about (the intro)
-    scraped = None
     for i in info:
         tag = i.find_parent()
         if tag.name == "div":
             if 'class' in tag.attrs and "mw-parser-output" in tag['class']:
-                header_len = 280 - len(f"{page_url} - ...")
+                header_len = 280 - len(f"{page_name} - ...")
                 scraped = f"{page_name} - {i.get_text()[0:header_len]}..."
                 t = twitter.Tweet()
                 t.text(scraped)
+                print(f"sending the following to twitter:\n{scraped}")
                 return t.send_as_oauth1()
 
 schedule.every().day.at("12:00").do(tweet_article)
 # schedule.every(5).seconds.do(tweet_article)
 
+print("setup complete, listening...")
 while True:
     schedule.run_pending()
