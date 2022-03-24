@@ -41,4 +41,8 @@ def tweet_article():
                 t.text(scraped)
                 return t.send_as_oauth1()
 
-schedule.every().day.at("12:00").do(tweet_article())
+schedule.every().day.at("12:00").do(tweet_article)
+# schedule.every(5).seconds.do(tweet_article)
+
+while True:
+    schedule.run_pending()
