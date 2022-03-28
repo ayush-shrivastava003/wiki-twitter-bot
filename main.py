@@ -1,7 +1,7 @@
 """
 A bot that occasionally tweets a random Wikipedia page.
 
-Twitter | {to be added}
+Twitter | @ashrivastava003
 """
 
 from twitter_api import *
@@ -45,6 +45,12 @@ def tweet_article():
                     ellipsis = "..."
 
                 scraped = f"{page_name} - {i.get_text()[0:max_content_len]}{ellipsis}"
+
+                if len(scraped.encode()) > 280: # encoded unicode characters result in the tweet being too long
+                    scraped = scraped.encode()[:277]
+                    scraped = scraped.decode() + "..."
+                    print("after shortening:", scraped)
+
                 t = twitter.Tweet()
                 t.text(scraped)
                 print(f"\nsending the following to twitter:\n{scraped}")
